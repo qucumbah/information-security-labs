@@ -7,6 +7,9 @@ const plainElement = document.querySelector('#plain') as HTMLInputElement;
 const encryptedElement = document.querySelector('#encrypted') as HTMLInputElement;
 const matrixInput = document.querySelector('#matrix') as HTMLInputElement;
 
+const loadPlainElement = document.querySelector('#loadPlain') as HTMLInputElement;
+const loadEncryptedElement = document.querySelector('#loadEncrypted') as HTMLInputElement;
+
 const useRotationSection = document.querySelector('#useRotationSection') as HTMLElement;
 const useRotationCheckbox = document.querySelector('#useRotation') as HTMLInputElement;
 
@@ -64,4 +67,26 @@ decryptButton.addEventListener('click', () => {
   const encryptedMessage: string = encryptedElement.value;
   const decryptedMessage: string = decrypt(encryptedMessage, matrix, useRotation);
   plainElement.value = decryptedMessage;
+});
+
+loadPlainElement.addEventListener('change', () => {
+  if (loadPlainElement.files === null || loadPlainElement.files.length === 0) {
+    return;
+  }
+
+  const file: File = loadPlainElement.files[0]!;
+  const reader = new FileReader();
+  reader.readAsText(file);
+  reader.addEventListener('load', () => plainElement.value = reader.result!.toString());
+});
+
+loadEncryptedElement.addEventListener('change', () => {
+  if (loadEncryptedElement.files === null || loadEncryptedElement.files.length === 0) {
+    return;
+  }
+
+  const file: File = loadEncryptedElement.files[0]!;
+  const reader = new FileReader();
+  reader.readAsText(file);
+  reader.addEventListener('load', () => encryptedElement.value = reader.result!.toString());
 });

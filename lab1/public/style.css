@@ -16,6 +16,10 @@ h1 {
   justify-content: center;
 }
 
-#useRotationSection {
+textarea {
+  display: block;
+}
+
+#label {
   display: block;
 }

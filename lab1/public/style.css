@@ -1,3 +1,7 @@
+h1 {
+  text-align: center;
+}
+
 .columns {
   display: flex;
   justify-content: space-around;
@@ -5,4 +9,13 @@
 
 #invalidMatrixWarning {
   background-color: red;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+}
+
+#useRotationSection {
+  display: block;
 }

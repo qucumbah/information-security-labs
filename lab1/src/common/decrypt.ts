@@ -1,7 +1,7 @@
 import Matrix from './Matrix';
 import * as util from './util';
 
-function decrypt(message: string, matrix: Matrix): string {
+function decrypt(message: string, matrix: Matrix, useRotation = false): string {
   const matrixLength: number = matrix.length * matrix[0]!.length;
 
   const decryptedChars: string[] = [];
@@ -11,11 +11,11 @@ function decrypt(message: string, matrix: Matrix): string {
 
     let tempMatrix: Matrix = matrix;
     readChars(chunk, tempMatrix, decryptedChars);
-    tempMatrix = util.flipHorizontally(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipHorizontally(tempMatrix);
     readChars(chunk, tempMatrix, decryptedChars);
-    tempMatrix = util.flipVertically(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipVertically(tempMatrix);
     readChars(chunk, tempMatrix, decryptedChars);
-    tempMatrix = util.flipHorizontally(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipHorizontally(tempMatrix);
     readChars(chunk, tempMatrix, decryptedChars);
   }
 

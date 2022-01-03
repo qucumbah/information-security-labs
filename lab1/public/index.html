@@ -10,6 +10,7 @@
   <title>Лабораторная работа 1</title>
 </head>
 <body>
+  <h1>Лабораторная работа 1. Решетка Кардано</h1>
   <div class="columns">
     <div class="column">
       <p>Сообщение:</p>
@@ -22,10 +23,13 @@
     <div class="column">
       <p>Матрица ('#' - заполнено; ' ' - пусто):</p>
       <textarea id="matrix" cols="30" rows="10"></textarea>
-      <p id="invalidMatrixWarning" display="none">Данная матрица не подходит для кодирования</p>
+      <label id="useRotationSection">Использовать разворот на 90°: <input type="checkbox" id="useRotation"></label>
+      <p id="invalidMatrixWarning" style="opacity: 0;">Данная матрица не подходит для кодирования</p>
     </div>
   </div>
-  <button id="encrypt">Закодировать</button>
-  <button id="decrypt">Раскодировать</button>
+  <div class="buttons">
+    <button id="encrypt">Закодировать</button>
+    <button id="decrypt">Раскодировать</button>
+  </div>
 </body>
 </html>

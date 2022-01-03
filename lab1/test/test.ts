@@ -26,6 +26,10 @@ function test(): void {
 
   assert(util.testMatrix(rectangularMatrix), 'Valid rectangular matrix');
 
+  const invalidMatrix: Matrix = ioUtil.readMatrixFromFile('./data/invalid.txt');
+
+  assert(!util.testMatrix(invalidMatrix), 'Invalid rectangular matrix');
+
   const longMessage1 = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKL';
   assert(encrypt(longMessage1, largeMatrix) === format('iaembnjfocgkhpldyqu2r3zv4sw0x51tE6AI7JFBK8CGDLH9'), 'Encrypt large message');
   assert(decrypt(encrypt(longMessage1, largeMatrix), largeMatrix) === longMessage1, 'Decrypt large message');
@@ -33,6 +37,19 @@ function test(): void {
   const longMessage2 = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOP';
   assert(encrypt(longMessage2, largeMatrix) === format('iaembnjfocgkhpldyqu2r3zv4sw0x51tE6AI7JFBK8CGDLH9#M##N####O#####P'), 'Encrypt large message out of bounds');
   assert(decrypt(encrypt(longMessage2, largeMatrix), largeMatrix) === longMessage2, 'Encrypt large message out of bounds');
+
+  const beforeRotation: Matrix = [
+    [true, false],
+    [false, false],
+  ];
+  const afterRotation1: Matrix = util.rotate(beforeRotation);
+  assert(afterRotation1[0]![1] === true, 'Rotation 1');
+  const afterRotation2: Matrix = util.rotate(afterRotation1);
+  assert(afterRotation2[1]![1] === true, 'Rotation 2');
+  const afterRotation3: Matrix = util.rotate(afterRotation2);
+  assert(afterRotation3[1]![0] === true, 'Rotation 3');
+  const afterRotation4: Matrix = util.rotate(afterRotation3);
+  assert(afterRotation4[0]![0] === true, 'Rotation 4');
 }
 test();
 

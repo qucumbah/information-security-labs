@@ -1,7 +1,7 @@
 import Matrix from './Matrix';
 import * as util from './util';
 
-function encrypt(message: string, matrix: Matrix): string {
+function encrypt(message: string, matrix: Matrix, useRotation = false): string {
   const matrixLength: number = matrix.length * matrix[0]!.length;
   const holeCount: number = matrix.reduce(
     (totalHoles, row) => totalHoles + row.reduce(
@@ -21,13 +21,13 @@ function encrypt(message: string, matrix: Matrix): string {
     let tempMatrix: Matrix = matrix;
     writeChars(subchunk, tempMatrix, encryptedChunkChars);
     subchunk = chunk.substring(holeCount * 1, holeCount * 2);
-    tempMatrix = util.flipHorizontally(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipHorizontally(tempMatrix);
     writeChars(subchunk, tempMatrix, encryptedChunkChars);
     subchunk = chunk.substring(holeCount * 2, holeCount * 3);
-    tempMatrix = util.flipVertically(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipVertically(tempMatrix);
     writeChars(subchunk, tempMatrix, encryptedChunkChars);
     subchunk = chunk.substring(holeCount * 3, holeCount * 4);
-    tempMatrix = util.flipHorizontally(tempMatrix);
+    tempMatrix = useRotation ? util.rotate(tempMatrix) : util.flipHorizontally(tempMatrix);
     writeChars(subchunk, tempMatrix, encryptedChunkChars);
 
     encryptedChunks.push(encryptedChunkChars.join(''));

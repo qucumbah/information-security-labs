@@ -28,6 +28,10 @@ export function createEmptyMatrix(rowCount: number, colCount: number): Matrix {
 }
 
 export function testMatrix(matrix: Matrix): boolean {
+  if (matrix.length % 2 !== 0 || matrix[0]!.length % 2 !== 0) {
+    return false;
+  }
+
   const empty: Matrix = createEmptyMatrix(matrix.length, matrix[0]!.length);
 
   let tempMatrix: Matrix = matrix;
@@ -38,6 +42,8 @@ export function testMatrix(matrix: Matrix): boolean {
   if (!checkTaken(tempMatrix, empty)) return false;
   tempMatrix = flipHorizontally(tempMatrix);
   if (!checkTaken(tempMatrix, empty)) return false;
+
+  console.log(empty);
 
   return true;
 }
@@ -88,6 +94,21 @@ export function flipHorizontally(matrix: Matrix): Matrix {
   for (let row = 0; row < rowCount; row += 1) {
     for (let col = 0; col < colCount; col += 1) {
       newMatrix[row]![col] = matrix[row]![colCount - 1 - col]!;
+    }
+  }
+
+  return newMatrix;
+}
+
+export function rotate(matrix: Matrix): Matrix {
+  const rowCount: number = matrix.length;
+  const colCount: number = matrix[0]!.length;
+
+  const newMatrix = createEmptyMatrix(rowCount, colCount);
+
+  for (let row = 0; row < rowCount; row += 1) {
+    for (let col = 0; col < colCount; col += 1) {
+      newMatrix[col]![colCount - 1 - row] = matrix[row]![col]!;
     }
   }
 

@@ -1,20 +1,67 @@
 import * as util from '../common/util';
 import Matrix from '../common/Matrix';
+import encrypt from '../common/encrypt';
+import decrypt from '../common/decrypt';
 
-// const plain = document.querySelector('#plain') as HTMLElement;
-// const encrypted = document.querySelector('#encrypted') as HTMLElement;
-const matrix = document.querySelector('#matrix') as HTMLElement;
+const plainElement = document.querySelector('#plain') as HTMLInputElement;
+const encryptedElement = document.querySelector('#encrypted') as HTMLInputElement;
+const matrixInput = document.querySelector('#matrix') as HTMLInputElement;
+
+const useRotationSection = document.querySelector('#useRotationSection') as HTMLElement;
+const useRotationCheckbox = document.querySelector('#useRotation') as HTMLInputElement;
 
 const invalidMatrixWarning = document.querySelector('#invalidMatrixWarning') as HTMLElement;
 
-// const encrypt = document.querySelector('#encrypt') as HTMLElement;
-// const decrypt = document.querySelector('#decrypt') as HTMLElement;
+const encryptButton = document.querySelector('#encrypt') as HTMLButtonElement;
+const decryptButton = document.querySelector('#decrypt') as HTMLButtonElement;
 
-matrix.textContent = '# ##\n ###\n# ##\n### ';
+let matrix: Matrix | null = null;
+let useRotation: boolean = false;
 
-matrix.addEventListener('input', () => {
-  const matrixString: string = matrix.textContent!;
-  const mat: Matrix = util.readMatrix(matrixString);
-  console.log(mat, util.testMatrix(mat));
-  invalidMatrixWarning.style.display = util.testMatrix(mat) ? 'block' : 'none';
+matrixInput.textContent = '# ##\n ###\n# ##\n### ';
+
+function readMatrixFromUserInput() {
+  const matrixString: string = matrixInput.value;
+  matrix = util.readMatrix(matrixString);
+
+  const isSquare = ((matrix.length !== 0) && (matrix.length === matrix[0]!.length));
+  useRotationSection.style.opacity = isSquare ? '1' : '0';
+
+  if (!isSquare) {
+    useRotation = false;
+    useRotationCheckbox.checked = false;
+  }
+
+  const isValid: boolean = util.testMatrix(matrix);
+  invalidMatrixWarning.style.opacity = isValid ? '0' : '1';
+
+  encryptButton.disabled = !isValid;
+  decryptButton.disabled = !isValid;
+}
+
+matrixInput.addEventListener('input', readMatrixFromUserInput);
+readMatrixFromUserInput();
+
+useRotationCheckbox.addEventListener('change', () => {
+  useRotation = useRotationCheckbox.checked;
+});
+
+encryptButton.addEventListener('click', () => {
+  if (matrix === null || !util.testMatrix(matrix)) {
+    return;
+  }
+
+  const message: string = plainElement.value;
+  const encryptedMessage: string = encrypt(message, matrix, useRotation);
+  encryptedElement.value = encryptedMessage;
+});
+
+decryptButton.addEventListener('click', () => {
+  if (matrix === null || !util.testMatrix(matrix)) {
+    return;
+  }
+
+  const encryptedMessage: string = encryptedElement.value;
+  const decryptedMessage: string = decrypt(encryptedMessage, matrix, useRotation);
+  plainElement.value = decryptedMessage;
 });

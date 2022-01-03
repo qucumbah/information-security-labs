@@ -1,0 +1,16 @@
+h1 {
+  text-align: center;
+}
+
+.columns {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

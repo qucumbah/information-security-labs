@@ -15,5 +15,6 @@ matrix.textContent = '# ##\n ###\n# ##\n### ';
 matrix.addEventListener('input', () => {
   const matrixString: string = matrix.textContent!;
   const mat: Matrix = util.readMatrix(matrixString);
+  console.log(mat, util.testMatrix(mat));
   invalidMatrixWarning.style.display = util.testMatrix(mat) ? 'block' : 'none';
 });

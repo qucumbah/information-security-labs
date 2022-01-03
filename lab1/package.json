@@ -1,10 +1,9 @@
 {
   "name": "lab1",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "build": "node make.js",
+    "test": "ts-node test/test.ts",
+    "cli": "ts-node src/cli/index.ts"
   },
   "keywords": [],
   "author": "",

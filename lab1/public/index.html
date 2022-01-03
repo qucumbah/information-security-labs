@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./require.js" data-main="src/web/index"></script>
+  <script src="./index.js" defer></script>
+  <link rel="stylesheet" href="./style.css">
+  <title>Лабораторная работа 1</title>
+</head>
+<body>
+  <div class="columns">
+    <div class="column">
+      <p>Сообщение:</p>
+      <textarea id="plain" cols="30" rows="10"></textarea>
+    </div>
+    <div class="column">
+      <p>Закодированное сообщение:</p>
+      <textarea id="encrypted" cols="30" rows="10"></textarea>
+    </div>
+    <div class="column">
+      <p>Матрица ('#' - заполнено; ' ' - пусто):</p>
+      <textarea id="matrix" cols="30" rows="10"></textarea>
+      <p id="invalidMatrixWarning" display="none">Данная матрица не подходит для кодирования</p>
+    </div>
+  </div>
+  <button id="encrypt">Закодировать</button>
+  <button id="decrypt">Раскодировать</button>
+</body>
+</html>

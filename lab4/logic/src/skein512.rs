@@ -82,7 +82,7 @@ impl Skein512 {
         result
     }
 
-    fn process_block(&mut self, off: usize, blocks: usize, bytes: usize) {
+    fn process_block(&mut self, mut off: usize, blocks: usize, bytes: usize) {
         for _ in 0..blocks {
             self.tweak0 += bytes as u64;
             
@@ -103,6 +103,74 @@ impl Skein512 {
             self.x[5] = get_long(&self.buffer, off + 40);
             self.x[6] = get_long(&self.buffer, off + 48);
             self.x[7] = get_long(&self.buffer, off + 56);
+
+            let mut x0 = self.x[0] + self.key_schedule[0];
+            let mut x1 = self.x[1] + self.key_schedule[0];
+            let mut x2 = self.x[2] + self.key_schedule[0];
+            let mut x3 = self.x[3] + self.key_schedule[0];
+            let mut x4 = self.x[4] + self.key_schedule[0];
+            let mut x5 = self.x[5] + self.key_schedule[0] + self.tweak0;
+            let mut x6 = self.x[6] + self.key_schedule[0] + self.tweak1;
+            let mut x7 = self.x[7] + self.key_schedule[0];
+
+            for r in (1..ROUNDS / 4 + 1).step_by(2) {
+                let rm9 = r % 9;
+                let rm3 = r % 3;
+
+                x0 += x1; x1 = rotl_xor(x1, R[0][0] as usize, x0);
+                x2 += x3; x3 = rotl_xor(x3, R[0][1] as usize, x2);
+                x4 += x5; x5 = rotl_xor(x5, R[0][2] as usize, x4);
+                x6 += x7; x7 = rotl_xor(x7, R[0][3] as usize, x6);
+                x2 += x1; x1 = rotl_xor(x1, R[1][0] as usize, x2);
+                x4 += x7; x7 = rotl_xor(x7, R[1][1] as usize, x4);
+                x6 += x5; x5 = rotl_xor(x5, R[1][2] as usize, x6);
+                x0 += x3; x3 = rotl_xor(x3, R[1][3] as usize, x0);
+                x4 += x1; x1 = rotl_xor(x1, R[2][0] as usize, x4);
+                x6 += x3; x3 = rotl_xor(x3, R[2][1] as usize, x6);
+                x0 += x5; x5 = rotl_xor(x5, R[2][2] as usize, x0);
+                x2 += x7; x7 = rotl_xor(x7, R[2][3] as usize, x2);
+
+                x6 += x1; x1 = rotl_xor(x1, R[3][0] as usize, x6) + self.key_schedule[rm9 + 1];
+                x0 += x7; x7 = rotl_xor(x7, R[3][1] as usize, x0) + self.key_schedule[rm9 + 7] + r as u64;
+                x2 += x5; x5 = rotl_xor(x5, R[3][2] as usize, x2) + self.key_schedule[rm9 + 5] + self.tweak_schedule[rm3];
+                x4 += x3; x3 = rotl_xor(x3, R[3][3] as usize, x4) + self.key_schedule[rm9 + 3];
+
+                x0 += x1 + self.key_schedule[rm9 + 0]; x1 = rotl_xor(x1, R[4][0] as usize, x0);
+                x2 += x3 + self.key_schedule[rm9 + 2]; x1 = rotl_xor(x1, R[4][1] as usize, x2);
+                x4 += x5 + self.key_schedule[rm9 + 4]; x1 = rotl_xor(x1, R[4][2] as usize, x4);
+                x6 += x7 + self.key_schedule[rm9 + 6] + self.tweak_schedule[rm3 + 1]; x1 = rotl_xor(x1, R[4][3] as usize, x6);
+
+                x2 += x1; x1 = rotl_xor(x1, R[5][0] as usize, x2);
+                x4 += x7; x7 = rotl_xor(x7, R[5][1] as usize, x4);
+                x6 += x5; x5 = rotl_xor(x5, R[5][2] as usize, x6);
+                x0 += x3; x3 = rotl_xor(x3, R[5][3] as usize, x0);
+                x4 += x1; x1 = rotl_xor(x1, R[6][0] as usize, x4);
+                x6 += x3; x3 = rotl_xor(x3, R[6][1] as usize, x6);
+                x0 += x5; x5 = rotl_xor(x5, R[6][2] as usize, x0);
+                x2 += x7; x7 = rotl_xor(x7, R[6][3] as usize, x2);
+
+                x6 += x1; x1 = rotl_xor(x1, R[7][0] as usize, x6) + self.key_schedule[rm9 + 2];
+                x0 += x7; x7 = rotl_xor(x7, R[7][1] as usize, x0) + self.key_schedule[rm9 + 8] + r as u64 + 1;
+                x2 += x5; x5 = rotl_xor(x5, R[7][2] as usize, x2) + self.key_schedule[rm9 + 6] + self.tweak_schedule[rm3 + 1];
+                x4 += x3; x3 = rotl_xor(x3, R[7][3] as usize, x4) + self.key_schedule[rm9 + 4];
+
+                x0 += self.key_schedule[rm9 + 1];
+                x2 += self.key_schedule[rm9 + 3];
+                x4 += self.key_schedule[rm9 + 5];
+                x6 += self.key_schedule[rm9 + 7] + self.tweak_schedule[rm3 + 2];
+            }
+
+            self.x[0] ^= x0;
+            self.x[1] ^= x1;
+            self.x[2] ^= x2;
+            self.x[3] ^= x3;
+            self.x[4] ^= x4;
+            self.x[5] ^= x5;
+            self.x[6] ^= x6;
+            self.x[7] ^= x7;
+
+            self.tweak1 ^= !T1_FLAG_FIRST;
+            off += bytes;
         }
     }
 }
@@ -139,6 +207,10 @@ fn get_long(b: &[u8], i: usize) -> u64 {
     | ((b[i + 5] as u64 & 0xff) << 40)
     | ((b[i + 6] as u64 & 0xff) << 48)
     | ((b[i + 7] as u64 & 0xff) << 56)
+}
+
+fn rotl_xor(x: u64, n: usize, xor: u64) -> u64 {
+    ((x << n) | (x >> (64 - n))) ^ xor
 }
 
 #[cfg(test)]
@@ -182,5 +254,12 @@ mod tests {
     fn get_long_test() {
         let bytes: [u8; 10] = [0xff, 0x00, 0xff, 0x32, 0x10, 0x77, 0xf0, 0x06, 0x70, 0x35];
         assert_eq!(super::get_long(&bytes, 1), 0x7006f0771032ff00);
+    }
+
+    #[test]
+    fn rotl_xor_test() {
+        let num: u64 = 0x0001020304050607;
+        assert_eq!(super::rotl_xor(num, 56, 0), 0x0700010203040506);
+        assert_eq!(super::rotl_xor(num, 56, 0x40306), 0x0700010203000600);
     }
 }

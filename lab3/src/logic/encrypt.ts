@@ -4,7 +4,7 @@ import generateSubKeys from './generateSubKeys';
 export default function encrypt(input: Uint8Array, key: Uint8Array): Uint8Array {
   const K: Uint32Array = generateSubKeys(key);
 
-  const paddedLength: number = Math.ceil(input.length / 16) * 16;
+  const paddedLength: number = Math.floor(input.length / 16) * 16 + 16;
   const paddedInput: Uint8Array = new Uint8Array(paddedLength);
   const output: Uint8Array = new Uint8Array(paddedLength);
 

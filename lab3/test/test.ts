@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
 import blockDecrypt from '../src/logic/blockDecrypt';
 import blockEncrypt from '../src/logic/blockEncrypt';
@@ -113,16 +114,21 @@ function test(): void {
     assertEquals(newlyEncryptedBlock[i], block[i], 'block encrypt');
   }
 
-  const data: Uint8Array = fs.readFileSync('test/data.txt');
-  const key: Uint8Array = fs.readFileSync('test/key');
-  const expectedEncryptedData: Uint8Array = fs.readFileSync('test/data.enc');
+  testEncryption('test/data1');
+  testEncryption('test/data2');
+}
+test();
+
+function testEncryption(dataFolder: string): void {
+  const data: Uint8Array = fs.readFileSync(path.join(dataFolder, 'data.txt'));
+  const key: Uint8Array = fs.readFileSync(path.join(dataFolder, 'key'));
+  const expectedEncryptedData: Uint8Array = fs.readFileSync(path.join(dataFolder, 'data.enc'));
 
   const encryptedData: Uint8Array = encrypt(data, key);
   for (let i = 0; i < expectedEncryptedData.length; i += 1) {
     assertEquals(expectedEncryptedData[i], encryptedData[i], 'encrypt');
   }
 }
-test();
 
 // @ts-ignore
 function assert(condition: boolean, message: string): void {

@@ -1,4 +1,4 @@
-// @ts-ignore
+import blockDecrypt from '../src/logic/blockDecrypt';
 import E from '../src/logic/E';
 import generateSubKeys from '../src/logic/generateSubKeys';
 import maskFrom from '../src/logic/maskFrom';
@@ -74,6 +74,33 @@ function test(): void {
   testE(E(325789, 4329875, 2436825), [2144440013, -2062024669, -1971322375]);
   testE(E(582765, 337487, 13764623), [-911639670, 1884676096, 2040544616]);
   testE(E(-325356, 25726, -257825), [-1853662477, -76705025, -1254324964]);
+
+  const expectedDecryptedBlock: number[] = [
+    247,
+    144,
+    46,
+    251,
+    227,
+    213,
+    134,
+    71,
+    151,
+    131,
+    25,
+    228,
+    102,
+    110,
+    119,
+    204
+  ];
+
+  const block = new Uint8Array([-88, -35, -21, 23, 110, 17, 4, 40, 59, -16, -22, 31, -123, -109, -40, 22]);
+  const decryptedBlock = new Uint8Array(16);
+  blockDecrypt(block, 0, decryptedBlock, 0, subKeys);
+
+  for (let i = 0; i < 16; i += 1) {
+    assertEquals(decryptedBlock[i], expectedDecryptedBlock[i], 'block decrypt');
+  }
 }
 test();
 

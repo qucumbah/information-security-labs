@@ -1,4 +1,5 @@
 // @ts-ignore
+import E from '../src/logic/E';
 import { default as generateSubKeys, rotl, maskFrom } from '../src/logic/generateSubKeys';
 
 function test(): void {
@@ -61,6 +62,16 @@ function test(): void {
   for (let i = 0; i < 40; i += 1) {
     assertEquals(subKeys[i], expectedSubkeys[i], 'subkeys');
   }
+
+  function testE(actual: [number, number, number], expected: [number, number, number]): void {
+    for (let i = 0; i < 3; i += 1) {
+      assertEquals(actual[i], expected[i], 'E');
+    }
+  }
+  testE(E(2147483647, 15, 2), [-485956883, 1073741831, -8389633]);
+  testE(E(325789, 4329875, 2436825), [2144440013, -2062024669, -1971322375]);
+  testE(E(582765, 337487, 13764623), [-911639670, 1884676096, 2040544616]);
+  testE(E(-325356, 25726, -257825), [-1853662477, -76705025, -1254324964]);
 }
 test();
 

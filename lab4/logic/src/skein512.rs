@@ -132,6 +132,7 @@ mod tests {
     fn hash_tests() {
         hash_test(1);
         hash_test(2);
+        hash_test(3);
     }
 
     fn hash_test(number: u8) {

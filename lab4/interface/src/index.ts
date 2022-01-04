@@ -1,7 +1,7 @@
-import loadLogic, { initialize } from '../../logic/pkg/logic.js';
+import loadLogic, { initialize, InitOutput, skein512_hash } from '../../logic/pkg/logic.js';
 
 async function main() {
-  await loadLogic();
+  const initOutput: InitOutput = await loadLogic();
   initialize();
 
   const messageInput = document.querySelector('#message') as HTMLInputElement;
@@ -16,7 +16,10 @@ async function main() {
       return;
     }
   
-    hashOutput.value = `Hash for ${message}`
+    const hashPtr: number = skein512_hash(message);
+    const hashBytes = new Uint8Array(initOutput.memory.buffer, hashPtr, 64);
+
+    hashOutput.value = [...hashBytes].map((byte) => byte.toString()).join('');
   });
   
   messageFileInput.addEventListener('change', () => {

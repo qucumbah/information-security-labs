@@ -22,7 +22,7 @@ pub fn hash(m: &[u8], h: &mut [u8; 64]) {
     t[0] = 0;
     t[1] = 0x70u64 << 56;
 
-    while t[0] < (m.len() - 64) as u64 {
+    while m.len() > 64 && t[0] < (m.len() - 64) as u64 {
         t[0] += 64;
         let o = (t[0] - 64) as usize;
         block(&mut c, &mut t, &m, o, d);
@@ -129,9 +129,14 @@ mod tests {
     }
 
     #[test]
-    fn hash_test() {
-        let message = &read_file_as_bytes("./data/message1.txt")[..];
-        let expected_hash = &read_file_as_bytes("./data/hash1.txt")[..];
+    fn hash_tests() {
+        hash_test(1);
+        hash_test(2);
+    }
+
+    fn hash_test(number: u8) {
+        let message = &read_file_as_bytes(format!("./data/message{}.txt", number).as_str())[..];
+        let expected_hash = &read_file_as_bytes(format!("./data/hash{}.txt", number).as_str())[..];
 
         let mut actual_hash = [0u8; 64];
         super::hash(message, &mut actual_hash);

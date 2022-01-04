@@ -19,7 +19,8 @@ async function main() {
     const hashPtr: number = skein512_hash(message);
     const hashBytes = new Uint8Array(initOutput.memory.buffer, hashPtr, 64);
 
-    hashOutput.value = [...hashBytes].map((byte) => byte.toString()).join('');
+    const byteToHex = (byte: number) => ((byte < 16) ? '0' : '') + byte.toString(16);
+    hashOutput.value = [...hashBytes].map(byteToHex).join('');
   });
   
   messageFileInput.addEventListener('change', () => {

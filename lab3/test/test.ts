@@ -1,6 +1,9 @@
+import * as fs from 'fs';
+
 import blockDecrypt from '../src/logic/blockDecrypt';
 import blockEncrypt from '../src/logic/blockEncrypt';
 import E from '../src/logic/E';
+import encrypt from '../src/logic/encrypt';
 import generateSubKeys from '../src/logic/generateSubKeys';
 import maskFrom from '../src/logic/maskFrom';
 import rotl from '../src/logic/rotl';
@@ -108,6 +111,15 @@ function test(): void {
 
   for (let i = 0; i < 16; i += 1) {
     assertEquals(newlyEncryptedBlock[i], block[i], 'block encrypt');
+  }
+
+  const data: Uint8Array = fs.readFileSync('test/data.txt');
+  const key: Uint8Array = fs.readFileSync('test/key');
+  const expectedEncryptedData: Uint8Array = fs.readFileSync('test/data.enc');
+
+  const encryptedData: Uint8Array = encrypt(data, key);
+  for (let i = 0; i < expectedEncryptedData.length; i += 1) {
+    assertEquals(expectedEncryptedData[i], encryptedData[i], 'encrypt');
   }
 }
 test();

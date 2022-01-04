@@ -1,4 +1,5 @@
 import blockDecrypt from '../src/logic/blockDecrypt';
+import blockEncrypt from '../src/logic/blockEncrypt';
 import E from '../src/logic/E';
 import generateSubKeys from '../src/logic/generateSubKeys';
 import maskFrom from '../src/logic/maskFrom';
@@ -100,6 +101,13 @@ function test(): void {
 
   for (let i = 0; i < 16; i += 1) {
     assertEquals(decryptedBlock[i], expectedDecryptedBlock[i], 'block decrypt');
+  }
+
+  const newlyEncryptedBlock = new Uint8Array(16);
+  blockEncrypt(decryptedBlock, 0, newlyEncryptedBlock, 0, subKeys);
+
+  for (let i = 0; i < 16; i += 1) {
+    assertEquals(newlyEncryptedBlock[i], block[i], 'block encrypt');
   }
 }
 test();

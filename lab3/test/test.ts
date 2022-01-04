@@ -1,6 +1,8 @@
 // @ts-ignore
 import E from '../src/logic/E';
-import { default as generateSubKeys, rotl, maskFrom } from '../src/logic/generateSubKeys';
+import generateSubKeys from '../src/logic/generateSubKeys';
+import maskFrom from '../src/logic/maskFrom';
+import rotl from '../src/logic/rotl';
 
 function test(): void {
   assertEquals(rotl(0xa4a8d57b, 9), 1370158921, 'rotl');

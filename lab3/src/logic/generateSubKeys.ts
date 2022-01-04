@@ -1,3 +1,5 @@
+import maskFrom from './maskFrom';
+import rotl from './rotl';
 import S from './S';
 
 export default function generateSubKeys(key: Uint8Array): Uint32Array {
@@ -42,21 +44,4 @@ export default function generateSubKeys(key: Uint8Array): Uint32Array {
   }
 
   return K;
-}
-
-export function rotl(num: number, amount: number): number {
-  return ((num << amount) | (num >>> (32 - amount))) & 0xffffffff;
-}
-
-export function maskFrom(x: number): number {
-  let m: number = (~x ^ (x >>> 1)) & 0x7fffffff;
-  m &= (m >>> 1) & (m >>> 2);
-  m &= (m >>> 3) & (m >>> 6);
-
-  m <<= 1;
-  m |= (m << 1);
-  m |= (m << 2);
-  m |= (m << 4);
-
-  return m & 0xfffffffc;
 }

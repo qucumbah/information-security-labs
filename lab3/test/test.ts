@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import blockDecrypt from '../src/logic/blockDecrypt';
 import blockEncrypt from '../src/logic/blockEncrypt';
+import decrypt from '../src/logic/decrypt';
 import E from '../src/logic/E';
 import encrypt from '../src/logic/encrypt';
 import generateSubKeys from '../src/logic/generateSubKeys';
@@ -127,6 +128,14 @@ function testEncryption(dataFolder: string): void {
   const encryptedData: Uint8Array = encrypt(data, key);
   for (let i = 0; i < expectedEncryptedData.length; i += 1) {
     assertEquals(expectedEncryptedData[i], encryptedData[i], 'encrypt');
+  }
+
+  const decryptedData: Uint8Array = decrypt(encryptedData, key);
+
+  assertEquals(decryptedData.length, data.length, 'Decription data length match');
+  
+  for (let i = 0; i < data.length; i += 1) {
+    assertEquals(decryptedData[i], data[i], `decrypt ${i}`);
   }
 }
 

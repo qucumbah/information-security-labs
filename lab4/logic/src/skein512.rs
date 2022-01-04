@@ -74,10 +74,14 @@ impl Skein512 {
             key_schedule: [0; 17],
         };
 
+        result.start_new_type(TYPE_CONFIG | T1_FLAG_FINAL);
+
         let w = [SCHEMA_VERSION, result.hash_bit_count as u64];
         set_bytes(&w, &mut result.buffer, 16);
 
         result.process_block(0, 1, 4 * WORDS);
+
+        result.start_new_type(TYPE_MESSAGE);
 
         result
     }
@@ -172,6 +176,11 @@ impl Skein512 {
             self.tweak1 ^= !T1_FLAG_FIRST;
             off += bytes;
         }
+    }
+
+    fn start_new_type(&mut self, new_type: u64) {
+        self.tweak0 = 0;
+        self.tweak1 = T1_FLAG_FIRST | new_type;
     }
 }
 

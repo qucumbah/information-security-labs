@@ -1,3 +1,6 @@
+import decrypt from '../logic/decrypt';
+import encrypt from '../logic/encrypt';
+
 const messageInput = document.querySelector('#messageInput') as HTMLInputElement;
 const keyInput = document.querySelector('#keyInput') as HTMLInputElement;
 
@@ -16,6 +19,10 @@ function updateMessage() {
   reader.readAsArrayBuffer(file);
   reader.addEventListener('load', () => {
     message = new Uint8Array(reader.result as ArrayBuffer);
+
+    const cipherAvailable: boolean = key !== null && message !== null;
+    decryptButton.disabled = !cipherAvailable;
+    encryptButton.disabled = !cipherAvailable;
   });
 }
 messageInput.addEventListener('change', updateMessage);
@@ -32,11 +39,29 @@ function updateKey() {
   reader.readAsArrayBuffer(file);
   reader.addEventListener('load', () => {
     key = new Uint8Array(reader.result as ArrayBuffer);
+
+    const cipherAvailable: boolean = key !== null && message !== null;
+    decryptButton.disabled = !cipherAvailable;
+    encryptButton.disabled = !cipherAvailable;
   });
 }
 keyInput.addEventListener('change', updateKey);
 
+decryptButton.addEventListener('click', () => {
+  if (key === null || message === null) {
+    return;
+  }
 
+  createFileDownload(decrypt(message, key));
+});
+
+encryptButton.addEventListener('click', () => {
+  if (key === null || message === null) {
+    return;
+  }
+
+  createFileDownload(encrypt(message, key));
+});
 
 function createFileDownload(fileContent: Uint8Array): void {
   const file = new Blob([fileContent]);

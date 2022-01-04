@@ -2,7 +2,7 @@
   "name": "lab4",
   "scripts": {
     "build": "node make.js",
-    "test": "cd logic && cargo test",
+    "test": "cd logic && cargo test --no-run",
     "cli": "ts-node src/cli/index.ts",
     "start": "nodemon"
   },

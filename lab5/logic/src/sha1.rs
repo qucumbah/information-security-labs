@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 pub fn hash(message: &[u8], hash: &mut [u8; 20]) {
     let mut h: [u32; 5] = [
         0x67452301,
@@ -79,12 +77,6 @@ fn pad(message: &[u8]) -> Vec<u8> {
     result
 }
 
-fn array_copy<T: Copy>(src: &[T], src_offset: usize, dst: &mut [T], dst_offset: usize, count: usize) {
-    for i in 0..count {
-        dst[dst_offset + i] = src[src_offset + i];
-    }
-}
-
 fn u64_to_bytes(src: u64) -> Vec<u8> {
     let mut result: Vec<u8> = Vec::new();
 
@@ -120,29 +112,9 @@ fn lotr(num: u32, count: usize) -> u32 {
 mod tests {
     use std::{fs::File, io::Read};
 
-    use super::array_copy;
-
     #[test]
     fn overflow() {
         assert_eq!(255u8 + 1u8, 0u8);
-    }
-
-    #[test]
-    fn array_copy_test() {
-        let a = [0, 1, 2, 3, 4, 5];
-        let mut b = [6; 10];
-        array_copy(&a, 1, &mut b, 2, 3);
-        array_copy(&a, 4, &mut b, 9, 1);
-        assert_eq!(b[0], 6);
-        assert_eq!(b[1], 6);
-        assert_eq!(b[2], 1);
-        assert_eq!(b[3], 2);
-        assert_eq!(b[4], 3);
-        assert_eq!(b[5], 6);
-        assert_eq!(b[6], 6);
-        assert_eq!(b[7], 6);
-        assert_eq!(b[8], 6);
-        assert_eq!(b[9], 4);
     }
 
     #[test]

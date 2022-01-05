@@ -82,6 +82,24 @@ fn generate_keys(p: &BigNum, q: &BigNum, g: &BigNum) -> (BigNum, BigNum) {
     (x, y)
 }
 
+fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigNum, BigNum) {
+    loop {
+        let k = rand(&q.sub(&bignum(2))).add(&bignum(2));
+        let r = modulus(&powmod(g, &k, p), q);
+        if r == bignum(0) {
+            continue;
+        }
+
+        let m = BigNum::from_slice(&sha1::hash(message)).unwrap();
+        let s = modulus(&mul(&inverse(&k, q), &m.add(&mul(x, &r))), q);
+        if s == bignum(0) {
+            continue;
+        }
+
+        return (r, s);
+    }
+}
+
 fn bignum(src: u32) -> BigNum {
     BigNum::from_u32(src).unwrap()
 }
@@ -155,6 +173,12 @@ fn is_prime(num: &BigNum) -> bool {
     num.is_prime(25, &mut BigNumContext::new().unwrap()).unwrap()
 }
 
+fn inverse(a: &BigNum, b: &BigNum) -> BigNum {
+    let mut result = BigNum::new().unwrap();
+    result.mod_inverse(a, b, &mut BigNumContext::new().unwrap()).unwrap();
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use openssl::bn::{BigNum, BigNumContext};
@@ -190,6 +214,8 @@ mod tests {
         assert_eq!(pow(&bignum(3), &bignum(2)), BigNum::from_u32(9).unwrap());
         assert_eq!(or(&bignum(5), &bignum(2)), BigNum::from_u32(7).unwrap());
         assert!(is_prime(&bignum(5)));
+
+        assert_eq!(inverse(&bignum(23), &bignum(10000007)), bignum(5217395));
     }
 
     #[test]
@@ -228,5 +254,16 @@ mod tests {
         assert!(x.lt(&q));
 
         assert_eq!(y, powmod(&g, &x, &p));
+    }
+
+    #[test]
+    fn sign_test() {
+        let p = BigNum::from_dec_str("89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558742").unwrap();
+        let q = BigNum::from_dec_str("1037760728721891820706685630761403650200206573193").unwrap();
+        let g = BigNum::from_dec_str("85588551305862488755900255048766199834119825006291566771159904328636942469104416382511597967737368036355223495936081063512778209146536993964808310113488347055781098188045052174684529230294726548862504339579425903754767219964660220008587875650124042734568649409817169138724774262204663207226523331086035940042").unwrap();
+
+        let (x, y) = generate_keys(&p, &q, &g);
+
+        let (r, s) = sign("Some message".as_bytes(), &p, &q, &g, &x);
     }
 }

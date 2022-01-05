@@ -6,7 +6,7 @@ pub fn hash(message: &[u8], hash: &mut [u8; 20]) {
 
 fn pad(message: &[u8]) -> Vec<u8> {
     let mut result: Vec<u8> = message.iter().map(|byte| *byte).collect();
-    
+
     let desired_length: usize = match message.len() % 64 {
         57..=63 => message.len() / 64 * 64 + 128,
         _ => message.len() / 64 * 64 + 64,
@@ -72,6 +72,41 @@ mod tests {
         let dst = super::to_bytes(src);
         for i in 0..8 {
             assert_eq!(dst[i], (7 - i) as u8);
+        }
+    }
+
+    #[test]
+    fn pad_tests() {
+        let message = [1u8; 80];
+        pad_test(&message, 128);
+
+        let message = [1u8; 128];
+        pad_test(&message, 192);
+
+        let message = [1u8; 57];
+        pad_test(&message, 128);
+
+        let message = [1u8; 56];
+        pad_test(&message, 64);
+    }
+
+    fn pad_test(message: &[u8], expected_length: usize) {
+        let padded_message: Vec<u8> = super::pad(message);
+
+        assert_eq!(padded_message.len(), expected_length);
+
+        let length_bytes = super::to_bytes(message.len() as u64);
+
+        for i in 0..expected_length - 8 {
+            let expected_element = if i < message.len() {
+                message[i]
+            } else if i <= expected_length - 8 {
+                0
+            } else {
+                length_bytes[i - expected_length - 8 - 1]
+            };
+
+            assert_eq!(padded_message[i], expected_element);
         }
     }
 

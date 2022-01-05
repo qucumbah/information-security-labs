@@ -1,4 +1,6 @@
-pub fn hash(message: &[u8], hash: &mut [u8; 20]) {
+pub fn hash(message: &[u8]) -> [u8; 20] {
+    let mut hash = [0u8; 20];
+
     let mut h: [u32; 5] = [
         0x67452301,
         0xEFCDAB89,
@@ -56,6 +58,8 @@ pub fn hash(message: &[u8], hash: &mut [u8; 20]) {
             hash[i * 4 + byte_number] = h_bytes[byte_number];
         }
     }
+
+    hash
 }
 
 fn pad(message: &[u8]) -> Vec<u8> {
@@ -196,8 +200,7 @@ mod tests {
         let message = &read_file_as_bytes(format!("./data/message{}.txt", number).as_str())[..];
         let expected_hash = &read_file_as_bytes(format!("./data/hash{}.txt", number).as_str())[..];
 
-        let mut actual_hash = [0u8; 20];
-        super::hash(message, &mut actual_hash);
+        let actual_hash = super::hash(message);
 
         assert_eq!(actual_hash, expected_hash);
     }

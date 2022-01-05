@@ -13,7 +13,7 @@ pub fn initialize() {
 }
 
 #[wasm_bindgen]
-pub fn skein512_hash(message: &str) -> *const u8 {
+pub fn sha1_hash(message: &str) -> *const u8 {
     let mut hash = [0u8; 20];
     sha1::hash(message.as_bytes(), &mut hash);
     hash.as_ptr()

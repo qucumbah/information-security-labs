@@ -28,7 +28,7 @@ fn generate_q(N: u32) -> (BigNum, BigNum) {
         let z: [u8; 20] = sha1::hash(&zz.to_vec()[..]);
         let u = BigNum::from_slice(&hash_xor(a, z)).unwrap();
         let mask = add(&pow(&bignum(2), &bignum(N - 1)), &bignum(1));
-        let q = or(u, mask);
+        let q = or(&u, &mask);
         if is_prime(&q) {
             return (q.to_owned().unwrap(), s.to_owned().unwrap());
         }
@@ -53,12 +53,10 @@ fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigNum, s: &BigNum) -> Option<
         W = add(&W, &mul(&modulus(&V[n as usize], &pow(&bignum(2), &bignum(b))), &pow(&bignum(2), &mul(&bignum(160), &bignum(n)))));
         let X = add(&W, &pow(&bignum(2), &bignum(L - 1)));
         let c = modulus(&X, &mul(&bignum(2), q));
-        let p = sub(&X, &add(&c, &bignum(1)));
+        let p = sub(&X, &sub(&c, &bignum(1)));
 
-        if p.ge(&pow(&bignum(2), &bignum(L - 1))) {
-            if is_prime(&p) {
-                return Some(p);
-            }
+        if p.ge(&pow(&bignum(2), &bignum(L - 1))) && is_prime(&p) {
+            return Some(p);
         }
 
         j += n + 1;
@@ -113,7 +111,7 @@ fn hash_xor(a: [u8; 20], b: [u8; 20]) -> [u8; 20] {
     result
 }
 
-fn or(a: BigNum, b: BigNum) -> BigNum {
+fn or(a: &BigNum, b: &BigNum) -> BigNum {
     let mut result = BigNum::new().unwrap();
     for i in 0..max(a.num_bits(), b.num_bits()) {
         if a.is_bit_set(i) || b.is_bit_set(i) {
@@ -161,7 +159,7 @@ mod tests {
         assert_eq!(add(&bignum(15), &bignum(30)), BigNum::from_u32(45).unwrap());
         assert_eq!(modulus(&bignum(15), &bignum(6)), BigNum::from_u32(3).unwrap());
         assert_eq!(pow(&bignum(3), &bignum(2)), BigNum::from_u32(9).unwrap());
-        assert_eq!(or(bignum(5), bignum(2)), BigNum::from_u32(7).unwrap());
+        assert_eq!(or(&bignum(5), &bignum(2)), BigNum::from_u32(7).unwrap());
         assert!(is_prime(&bignum(5)));
     }
 
@@ -172,6 +170,7 @@ mod tests {
 
     #[test]
     fn generate_p_q_test() {
-        generate_p_q(1024, 160);
+        let (p, q): (BigNum, BigNum) = generate_p_q(1024, 160);
+        assert_eq!(modulus(&p, &q), bignum(1));
     }
 }

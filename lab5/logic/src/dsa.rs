@@ -65,6 +65,17 @@ fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigNum, s: &BigNum) -> Option<
     Option::None
 }
 
+fn generate_g(p: &BigNum, q: &BigNum) -> BigNum {
+    loop {
+        let h = rand(&p.sub(&bignum(3))).add(&bignum(2));
+        let exp = div(&p.sub(&bignum(1)), &q);
+        let g = powmod(&h, &exp, &p);
+        if g.gt(&bignum(1)) {
+            return g;
+        }
+    }
+}
+
 fn bignum(src: u32) -> BigNum {
     BigNum::from_u32(src).unwrap()
 }
@@ -87,20 +98,32 @@ fn sub(a: &BigNum, b: &BigNum) -> BigNum {
 
 fn mul(a: &BigNum, b: &BigNum) -> BigNum {
     let mut result = BigNum::new().unwrap();
-    result.checked_mul(&a, &b, &mut BigNumContext::new().unwrap()).unwrap();
+    result.checked_mul(a, b, &mut BigNumContext::new().unwrap()).unwrap();
+    result
+}
+
+fn div(a: &BigNum, b: &BigNum) -> BigNum {
+    let mut result = BigNum::new().unwrap();
+    result.checked_div(a, b, &mut BigNumContext::new().unwrap()).unwrap();
     result
 }
 
 fn modulus(a: &BigNum, b: &BigNum) -> BigNum {
     let mut result = BigNum::new().unwrap();
-    result.nnmod(&a, &b, &mut BigNumContext::new().unwrap()).unwrap();
+    result.nnmod(a, b, &mut BigNumContext::new().unwrap()).unwrap();
     result
 }
 
 fn pow(a: &BigNum, b: &BigNum) -> BigNum {
     let mut exp = BigNum::new().unwrap();
-    exp.exp(&a, &b, &mut BigNumContext::new().unwrap()).unwrap();
+    exp.exp(a, b, &mut BigNumContext::new().unwrap()).unwrap();
     exp
+}
+
+fn powmod(a: &BigNum, b: &BigNum, c: &BigNum) -> BigNum {
+    let mut result = BigNum::new().unwrap();
+    result.mod_exp(a, b, c, &mut BigNumContext::new().unwrap()).unwrap();
+    result
 }
 
 fn hash_xor(a: [u8; 20], b: [u8; 20]) -> [u8; 20] {
@@ -172,5 +195,13 @@ mod tests {
     fn generate_p_q_test() {
         let (p, q): (BigNum, BigNum) = generate_p_q(1024, 160);
         assert_eq!(modulus(&p, &q), bignum(1));
+    }
+
+    #[test]
+    fn generate_g_test() {
+        generate_g(
+            &BigNum::from_dec_str("89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558742").unwrap(),
+            &BigNum::from_dec_str("1037760728721891820706685630761403650200206573193").unwrap(),
+        );
     }
 }

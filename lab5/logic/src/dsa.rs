@@ -22,7 +22,7 @@ fn generate_p_q(L: u32, N: u32) -> (BigNum, BigNum) {
 
 fn generate_q(N: u32) -> (BigNum, BigNum) {
     loop {
-        let s: BigNum = rand_range(&bignum(1), &pow(&bignum(2), &bignum(N)));
+        let s: BigNum = rand(&pow(&bignum(2), &bignum(N)).sub(&bignum(1))).add(&bignum(1));
         let a: [u8; 20] = sha1::hash(&s.to_vec()[..]);
         let zz = modulus(&add(&s, &bignum(1)), &pow(&bignum(2), &bignum(N)));
         let z: [u8; 20] = sha1::hash(&zz.to_vec()[..]);
@@ -71,12 +71,12 @@ fn bignum(src: u32) -> BigNum {
     BigNum::from_u32(src).unwrap()
 }
 
-fn rand_range(from: &BigNum, to: &BigNum) -> BigNum {
-    let diff = from.sub(to);
+fn rand(upto: &BigNum) -> BigNum {
     let mut rand = BigNum::new().unwrap();
-    diff.rand_range(&mut rand).unwrap();
 
-    add(&rand, from)
+    upto.rand_range(&mut rand).unwrap();
+
+    rand
 }
 
 fn add(a: &BigNum, b: &BigNum) -> BigNum {
@@ -156,12 +156,22 @@ mod tests {
     }
 
     #[test]
-    fn util_funcs_test(){
+    fn util_funcs_test() {
         assert_eq!(bignum(15), BigNum::from_u32(15).unwrap());
         assert_eq!(add(&bignum(15), &bignum(30)), BigNum::from_u32(45).unwrap());
         assert_eq!(modulus(&bignum(15), &bignum(6)), BigNum::from_u32(3).unwrap());
         assert_eq!(pow(&bignum(3), &bignum(2)), BigNum::from_u32(9).unwrap());
         assert_eq!(or(bignum(5), bignum(2)), BigNum::from_u32(7).unwrap());
         assert!(is_prime(&bignum(5)));
+    }
+
+    #[test]
+    fn rand_test() {
+        rand(&BigNum::from_hex_str("10000000000000000000000000000000000000000").unwrap().sub(&bignum(1)));
+    }
+
+    #[test]
+    fn generate_p_q_test() {
+        generate_p_q(1024, 160);
     }
 }

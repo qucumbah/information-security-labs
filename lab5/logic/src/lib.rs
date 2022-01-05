@@ -1,5 +1,6 @@
 mod utils;
 mod sha1;
+mod dsa;
 
 use wasm_bindgen::prelude::*;
 

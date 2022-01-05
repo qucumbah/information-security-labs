@@ -1,0 +1,14 @@
+h1 {
+  text-align: center;
+}
+
+.columns {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+textarea {
+  display: block;
+  font-family: monospace;
+}

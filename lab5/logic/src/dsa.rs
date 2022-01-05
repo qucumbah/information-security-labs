@@ -91,7 +91,13 @@ fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigN
         }
 
         let m = BigNum::from_slice(&sha1::hash(message)).unwrap();
-        let s = modulus(&mul(&inverse(&k, q), &m.add(&mul(x, &r))), q);
+        let inv = inverse(&k, q);
+
+        if inv == None {
+            continue;
+        }
+
+        let s = modulus(&mul(&inv.unwrap(), &m.add(&mul(x, &r))), q);
         if s == bignum(0) {
             continue;
         }
@@ -173,10 +179,13 @@ fn is_prime(num: &BigNum) -> bool {
     num.is_prime(25, &mut BigNumContext::new().unwrap()).unwrap()
 }
 
-fn inverse(a: &BigNum, b: &BigNum) -> BigNum {
+fn inverse(a: &BigNum, b: &BigNum) -> Option<BigNum> {
     let mut result = BigNum::new().unwrap();
-    result.mod_inverse(a, b, &mut BigNumContext::new().unwrap()).unwrap();
-    result
+    if let Ok(_) = result.mod_inverse(a, b, &mut BigNumContext::new().unwrap()) {
+        Some(result)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -215,7 +224,8 @@ mod tests {
         assert_eq!(or(&bignum(5), &bignum(2)), BigNum::from_u32(7).unwrap());
         assert!(is_prime(&bignum(5)));
 
-        assert_eq!(inverse(&bignum(23), &bignum(10000007)), bignum(5217395));
+        assert_eq!(inverse(&bignum(23), &bignum(10000007)), Some(bignum(5217395)));
+        assert_eq!(inverse(&bignum(16), &bignum(48)), None);
     }
 
     #[test]

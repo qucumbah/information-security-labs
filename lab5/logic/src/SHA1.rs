@@ -12,8 +12,8 @@ fn pad(message: &[u8]) -> Vec<u8> {
         _ => message.len() / 64 * 64 + 64,
     };
 
-    for i in result.len()..desired_length - 8 {
-        result[i] = 0;
+    for _ in result.len()..desired_length - 8 {
+        result.push(0);
     }
 
     result.extend(to_bytes(message.len() as u64));
@@ -31,7 +31,7 @@ fn to_bytes(src: u64) -> Vec<u8> {
     let mut result: Vec<u8> = Vec::new();
 
     for i in 0..8 {
-        result[i] = (src >> (i * 8)) as u8;
+        result.push((src >> ((7 - i) * 8)) as u8);
     }
 
     result
@@ -64,6 +64,15 @@ mod tests {
         assert_eq!(b[7], 6);
         assert_eq!(b[8], 6);
         assert_eq!(b[9], 4);
+    }
+
+    #[test]
+    fn to_bytes_test() {
+        let src = 0x0706050403020100;
+        let dst = super::to_bytes(src);
+        for i in 0..8 {
+            assert_eq!(dst[i], (7 - i) as u8);
+        }
     }
 
     #[test]

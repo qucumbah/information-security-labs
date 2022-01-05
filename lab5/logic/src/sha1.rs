@@ -37,6 +37,17 @@ fn to_bytes(src: u64) -> Vec<u8> {
     result
 }
 
+fn u32_from_bytes(bytes: &[u8], offset: usize) -> u32 {
+    (bytes[offset + 3] as u32 & 0xff)
+    | (bytes[offset + 2] as u32 & 0xff) << 8
+    | (bytes[offset + 1] as u32 & 0xff) << 16
+    | (bytes[offset + 0] as u32 & 0xff) << 24
+}
+
+fn lotr(num: u32, count: usize) -> u32 {
+    num << count | num >> (32 - count)
+}
+
 #[cfg(test)]
 mod tests {
     use std::{fs::File, io::Read};
@@ -73,6 +84,21 @@ mod tests {
         for i in 0..8 {
             assert_eq!(dst[i], (7 - i) as u8);
         }
+    }
+
+    #[test]
+    fn u32_from_bytes_test() {
+        let bytes: [u8; 10] = [0xff, 0x00, 0xff, 0x32, 0x10, 0x77, 0xf0, 0x06, 0x70, 0x35];
+        assert_eq!(super::u32_from_bytes(&bytes, 1), 0x00ff3210);
+    }
+
+    #[test]
+    fn lotr_test() {
+        let num: u32 = 0x01020304;
+        assert_eq!(super::lotr(num, 24), 0x04010203);
+        assert_eq!(super::lotr(num, 28), 0x40102030);
+        assert_eq!(super::lotr(num, 16), 0x03040102);
+        assert_eq!(super::lotr(num, 32), num);
     }
 
     #[test]

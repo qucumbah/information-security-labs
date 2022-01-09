@@ -91,7 +91,7 @@ pub fn u64_to_bytes(src: u64) -> Vec<u8> {
     result
 }
 
-fn u32_to_bytes(src: u32) -> Vec<u8> {
+pub fn u32_to_bytes(src: u32) -> Vec<u8> {
     let mut result: Vec<u8> = Vec::new();
 
     for i in 0..4 {

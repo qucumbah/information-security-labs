@@ -80,61 +80,63 @@ pub fn generate_keys(p: &BigUint, q: &BigUint, g: &BigUint) -> (BigUint, BigUint
     (x, y)
 }
 
-// pub fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigNum, BigNum) {
-//     loop {
-//         let k = rand(&q.sub(&bignum(2))).add(&bignum(2));
-//         let r = modulus(&powmod(g, &k, p), q);
-//         if r == bignum(0) {
-//             continue;
-//         }
+pub fn sign(message: &[u8], p: &BigUint, q: &BigUint, g: &BigUint, x: &BigUint) -> (BigUint, BigUint) {
+    loop {
+        let k = rand_range(&bignum(2), &q);
+        let r = &BigUint::modpow(g, &k, p) % q;
+        if r == bignum(0) {
+            continue;
+        }
 
-//         let m = BigNum::from_slice(&sha1::hash(message)).unwrap();
-//         let inv = inverse(&k, q);
+        let m = BigUint::from_bytes_be(&sha1::hash(message));
+        let inv = BigUint::mod_inverse(k, q);
 
-//         if inv == None {
-//             continue;
-//         }
+        if inv == None {
+            continue;
+        }
 
-//         let s = modulus(&mul(&inv.unwrap(), &m.add(&mul(x, &r))), q);
-//         if s == bignum(0) {
-//             continue;
-//         }
+        let inv = inv.unwrap().to_biguint().unwrap();
 
-//         return (r, s);
-//     }
-// }
+        let s = (&inv * &(m + x * &r)) % q;
+        if s == bignum(0) {
+            continue;
+        }
 
-// pub fn verify(message: &[u8], r: &BigNum, s: &BigNum, p: &BigNum, q: &BigNum, g: &BigNum, y: &BigNum) -> bool {
-//     if !validate_sign(r, s, q) {
-//         return false;
-//     }
+        return (r, s);
+    }
+}
 
-//     let w = inverse(s, q);
-//     if w == None {
-//         return false;
-//     }
+pub fn verify(message: &[u8], r: &BigUint, s: &BigUint, p: &BigUint, q: &BigUint, g: &BigUint, y: &BigUint) -> bool {
+    if !validate_sign(r, s, q) {
+        return false;
+    }
 
-//     let w = w.unwrap();
-//     let m = BigNum::from_slice(&sha1::hash(message)).unwrap();
+    let w = s.mod_inverse(q);
+    if w == None {
+        return false;
+    }
 
-//     let u1 = modulus(&mul(&m, &w), q);
-//     let u2 = modulus(&mul(&r, &w), q);
-//     let v = modulus(&modulus(&mul(&powmod(g, &u1, p), &powmod(y, &u2, p)), p), q);
+    let w = w.unwrap().to_biguint().unwrap();
+    let m = BigUint::from_bytes_be(&sha1::hash(message));
 
-//     &v == r
-// }
+    let u1 = m * &w % q;
+    let u2 = r * &w % q;
+    let v = (BigUint::modpow(g, &u1, p) * BigUint::modpow(y, &u2, p)) % p % q;
 
-// fn validate_sign(r: &BigNum, s: &BigNum, q: &BigNum) -> bool {
-//     if r < &bignum(0) && r > q {
-//         return false;
-//     }
+    &v == r
+}
 
-//     if s < &bignum(0) && s > q {
-//         return false;
-//     }
+fn validate_sign(r: &BigUint, s: &BigUint, q: &BigUint) -> bool {
+    if r < &bignum(0) && r > q {
+        return false;
+    }
 
-//     return true;
-// }
+    if s < &bignum(0) && s > q {
+        return false;
+    }
+
+    return true;
+}
 
 fn bignum(from: u32) -> BigUint {
     BigUint::from_slice(&[from])
@@ -188,6 +190,7 @@ mod tests {
 
         assert_eq!(bignum(23).mod_inverse(&bignum(10000007)), Some(BigInt::from_slice(Sign::Plus, &[5217395])));
         assert_eq!(bignum(16).mod_inverse(&bignum(48)), None);
+        assert_eq!(bignum(17).mod_inverse(&bignum(3120)), Some(BigInt::from_slice(Sign::Plus, &[2753])));
     }
 
     #[test]
@@ -236,50 +239,50 @@ mod tests {
         assert_eq!(y, BigUint::modpow(&g, &x, &p));
     }
 
-//     #[test]
-//     fn sign_test() {
-//         let p = BigNum::from_dec_str("89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558743").unwrap();
-//         let q = BigNum::from_dec_str("1037760728721891820706685630761403650200206573193").unwrap();
-//         let g = BigNum::from_dec_str("85588551305862488755900255048766199834119825006291566771159904328636942469104416382511597967737368036355223495936081063512778209146536993964808310113488347055781098188045052174684529230294726548862504339579425903754767219964660220008587875650124042734568649409817169138724774262204663207226523331086035940042").unwrap();
+    #[test]
+    fn sign_test() {
+        let p = bignum_dec(b"89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558743");
+        let q = bignum_dec(b"1037760728721891820706685630761403650200206573193");
+        let g = bignum_dec(b"85588551305862488755900255048766199834119825006291566771159904328636942469104416382511597967737368036355223495936081063512778209146536993964808310113488347055781098188045052174684529230294726548862504339579425903754767219964660220008587875650124042734568649409817169138724774262204663207226523331086035940042");
 
-//         let (x, y) = generate_keys(&p, &q, &g);
+        let (x, y) = generate_keys(&p, &q, &g);
 
-//         let (r, s) = sign("Some message".as_bytes(), &p, &q, &g, &x);
-//     }
+        let (r, s) = sign("Some message".as_bytes(), &p, &q, &g, &x);
+    }
 
-//     #[test]
-//     fn sign_and_verify_test() {
-//         let p = BigNum::from_dec_str("89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558743").unwrap();
-//         let q = BigNum::from_dec_str("1037760728721891820706685630761403650200206573193").unwrap();
-//         let g = BigNum::from_dec_str("41111043471889822114077449753681251913650222334152891898095001378720972254299986691277178549972320471707730757549237744933423087875474991586286638436923935433111761014463669008673610743150642573208990715144885448905962650691480954012967616972365157864402532679435621707164808895814554644686485453337565381608").unwrap();
+    #[test]
+    fn sign_and_verify_test() {
+        let p = bignum_dec(b"89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558743");
+        let q = bignum_dec(b"1037760728721891820706685630761403650200206573193");
+        let g = bignum_dec(b"41111043471889822114077449753681251913650222334152891898095001378720972254299986691277178549972320471707730757549237744933423087875474991586286638436923935433111761014463669008673610743150642573208990715144885448905962650691480954012967616972365157864402532679435621707164808895814554644686485453337565381608");
 
-//         let x = BigNum::from_dec_str("11150843081899901213446224036730032775956008097").unwrap();
-//         let y = BigNum::from_dec_str("13130317160934724365477893734511159857232564204894475379341210027653821707155845493326520282773656544798053533681192992543359273019697253594045426284856458829174483068527094293579844898161111775712584546064273699222796610531861608014999622340810777277617702558636374896713831259321672876023755526534577732070").unwrap();
+        let x = bignum_dec(b"11150843081899901213446224036730032775956008097");
+        let y = bignum_dec(b"13130317160934724365477893734511159857232564204894475379341210027653821707155845493326520282773656544798053533681192992543359273019697253594045426284856458829174483068527094293579844898161111775712584546064273699222796610531861608014999622340810777277617702558636374896713831259321672876023755526534577732070");
 
-//         let message = "Some message".as_bytes();
-//         let (r, s) = sign(message, &p, &q, &g, &x);
+        let message = "Some message".as_bytes();
+        let (r, s) = sign(message, &p, &q, &g, &x);
 
-//         assert!(verify(message, &r, &s, &p, &q, &g, &y));
-//     }
+        assert!(verify(message, &r, &s, &p, &q, &g, &y));
+    }
 
-//     #[test]
-//     fn generate_sign_and_verify_test() {
-//         let (p, q) = generate_p_q(1024, 160);
-//         let g = generate_g(&p, &q);
+    #[test]
+    fn generate_sign_and_verify_test() {
+        let (p, q) = generate_p_q(1024, 160);
+        let g = generate_g(&p, &q);
 
-//         let (x, y) = generate_keys(&p, &q, &g);
+        let (x, y) = generate_keys(&p, &q, &g);
 
-//         let message = "Some message".as_bytes();
-//         let (r, s) = sign(message, &p, &q, &g, &x);
+        let message = "Some message".as_bytes();
+        let (r, s) = sign(message, &p, &q, &g, &x);
 
-//         assert!(verify(message, &r, &s, &p, &q, &g, &y));
+        assert!(verify(message, &r, &s, &p, &q, &g, &y));
 
-//         println!("p: {:?}", p);
-//         println!("q: {:?}", q);
-//         println!("g: {:?}", g);
-//         println!("x: {:?}", x);
-//         println!("y: {:?}", y);
-//         println!("r: {:?}", r);
-//         println!("s: {:?}", s);
-//     }
+        println!("p: {:?}", p);
+        println!("q: {:?}", q);
+        println!("g: {:?}", g);
+        println!("x: {:?}", x);
+        println!("y: {:?}", y);
+        println!("r: {:?}", r);
+        println!("s: {:?}", s);
+    }
 }

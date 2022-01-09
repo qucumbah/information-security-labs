@@ -1,69 +1,67 @@
 #![allow(dead_code)]
 #![allow(non_snake_case)]
 
-// use crate::sha1;
+use crate::sha1;
 
 use num_bigint_dig::{BigUint, BigInt, RandBigInt, ModInverse, Sign};
 use num_bigint_dig;
-// use rand;
 
-// pub fn generate_p_q(L: u32, N: u32) -> (BigNum, BigNum) {
-//     let n: u32 = (L - 1) / N;
-//     let b: u32 = (L - 1) % n;
+pub fn generate_p_q(L: u32, N: u32) -> (BigUint, BigUint) {
+    let n: u32 = (L - 1) / N;
+    let b: u32 = (L - 1) % n;
 
-//     loop {
-//         let (q, s): (BigNum, BigNum) = generate_q(N);
-//         if let Some(p) = generate_p(L, N, n, b, &q, &s) {
-//             return (p, q);
-//         }
-//     }
-// }
+    loop {
+        let (q, s): (BigUint, BigUint) = generate_q(N);
+        if let Some(p) = generate_p(L, N, n, b, &q, &s) {
+            return (p, q);
+        }
+    }
+}
 
-// fn generate_q(N: u32) -> (BigUint, BigUint) {
-//     loop {
-//         let s: BigNum = rand(&pow(&bignum(2), &bignum(N)).sub(&bignum(1))).add(&bignum(1));
-//         let s: BigUint = 
-//         let a: [u8; 20] = sha1::hash(&s.to_vec()[..]);
-//         let zz = modulus(&add(&s, &bignum(1)), &pow(&bignum(2), &bignum(N)));
-//         let z: [u8; 20] = sha1::hash(&zz.to_vec()[..]);
-//         let u = BigNum::from_slice(&hash_xor(a, z)).unwrap();
-//         let mask = add(&pow(&bignum(2), &bignum(N - 1)), &bignum(1));
-//         let q = or(&u, &mask);
-//         if is_prime(&q) {
-//             return (q.to_owned().unwrap(), s.to_owned().unwrap());
-//         }
-//     }
-// }
+fn generate_q(N: u32) -> (BigUint, BigUint) {
+    loop {
+        let s: BigUint = rand_range(&bignum(1), &pow(&bignum(2), &bignum(N)));
+        let a: [u8; 20] = sha1::hash(&s.to_bytes_be()[..]);
+        let zz = (&s + &bignum(1)) % pow(&bignum(2), &bignum(N));
+        let z: [u8; 20] = sha1::hash(&zz.to_bytes_be()[..]);
+        let u = BigUint::from_bytes_be(&a) ^ BigUint::from_bytes_be(&z);
+        let mask = &pow(&bignum(2), &bignum(N - 1)) + &bignum(1);
+        let q = u | mask;
+        if is_prime(&q) {
+            return (q.to_owned(), s.to_owned());
+        }
+    }
+}
 
-// fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigNum, s: &BigNum) -> Option<BigNum> {
-//     let mut j = 2;
-//     for _ in 0..4096 {
-//         let mut V: Vec<BigNum> = Vec::new();
-//         for k in 0..n + 1 {
-//             let arg: BigNum = modulus(&add(s, &add(&bignum(j), &bignum(k))), &pow(&bignum(2), &bignum(N)));
-//             let zzv: [u8; 20] = sha1::hash(&arg.to_vec()[..]);
-//             V.push(BigNum::from_slice(&zzv).unwrap());
-//         }
+fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigUint, s: &BigUint) -> Option<BigUint> {
+    let mut j = 2;
+    for _ in 0..4096 {
+        let mut V: Vec<BigUint> = Vec::new();
+        for k in 0..n + 1 {
+            let arg: BigUint = (s + &bignum(j) + &bignum(k)) % pow(&bignum(2), &bignum(N));
+            let zzv: [u8; 20] = sha1::hash(&arg.to_bytes_be()[..]);
+            V.push(BigUint::from_bytes_be(&zzv));
+        }
 
-//         let mut W = bignum(0);
-//         for qq in 0..n {
-//             W = add(&W, &mul(&V[qq as usize], &pow(&bignum(2), &mul(&bignum(160), &bignum(qq)))));
-//         }
+        let mut W = bignum(0);
+        for qq in 0..n {
+            W = W + &V[qq as usize] * &pow(&bignum(2), &(bignum(160) * bignum(qq)));
+        }
 
-//         W = add(&W, &mul(&modulus(&V[n as usize], &pow(&bignum(2), &bignum(b))), &pow(&bignum(2), &mul(&bignum(160), &bignum(n)))));
-//         let X = add(&W, &pow(&bignum(2), &bignum(L - 1)));
-//         let c = modulus(&X, &mul(&bignum(2), q));
-//         let p = sub(&X, &sub(&c, &bignum(1)));
+        W = W + (&V[n as usize] % &pow(&bignum(2), &bignum(b)) * &pow(&bignum(2), &(bignum(160) * bignum(n))));
+        let X = &W + &pow(&bignum(2), &bignum(L - 1));
+        let c = &X % (&bignum(2) * q);
+        let p = &X - (c - bignum(1));
 
-//         if p.ge(&pow(&bignum(2), &bignum(L - 1))) && is_prime(&p) {
-//             return Some(p);
-//         }
+        if p.ge(&pow(&bignum(2), &bignum(L - 1))) && is_prime(&p) {
+            return Some(p);
+        }
 
-//         j += n + 1;
-//     }
+        j += n + 1;
+    }
 
-//     Option::None
-// }
+    Option::None
+}
 
 // pub fn generate_g(p: &BigNum, q: &BigNum) -> BigNum {
 //     loop {
@@ -205,11 +203,11 @@ mod tests {
         rand_range(&bignum(1), &bignum_hex(b"10000000000000000000000000000000000000000"));
     }
 
-//     #[test]
-//     fn generate_p_q_test() {
-//         let (p, q): (BigNum, BigNum) = generate_p_q(1024, 160);
-//         assert_eq!(modulus(&p, &q), bignum(1));
-//     }
+    #[test]
+    fn generate_p_q_test() {
+        let (p, q): (BigUint, BigUint) = generate_p_q(1024, 160);
+        assert_eq!(p % q, bignum(1));
+    }
 
 //     #[test]
 //     fn generate_g_test() {

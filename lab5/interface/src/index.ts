@@ -1,5 +1,5 @@
 // @ts-nocheck
-import loadLogic, { initialize, InitOutput, sha1_hash, generate_params } from '../../logic/pkg/logic.js';
+import loadLogic, { initialize, InitOutput, sha1_hash, generate_params, sign } from '../../logic/pkg/logic.js';
 
 async function main() {
   const initOutput: InitOutput = await loadLogic();
@@ -82,6 +82,47 @@ async function main() {
   const sInput = document.querySelector('#sInput') as HTMLInputElement;
 
   const generateSignatureButton = document.querySelector('#generateSignatureButton') as HTMLInputElement;
+
+  generateSignatureButton.addEventListener('click', () => {
+    if (
+      messageInput.value.length === 0
+      || pInput.value.length === 0
+      || qInput.value.length === 0
+      || gInput.value.length === 0
+      || xInput.value.length === 0
+    ) {
+      alert('Нужно заполнить поля сообщения и параметров');
+      return;
+    }
+
+    const message: string = messageInput.value;
+    // Pass these values as decimal strings. They'll be parsed on the rust side
+    const p: string = pInput.value;
+    const q: string = qInput.value;
+    const g: string = gInput.value;
+    const x: string = xInput.value;
+
+    // First 4 bytes are encoded signature length
+    const encodedSignatureLengthPtr: number = sign(message, p, q, g, x);
+    const encodedSignatureLength: number = readU32(new Uint8Array(initOutput.memory.buffer, encodedSignatureLengthPtr, 4), 0);
+
+    // Encoded signature format:
+    // r byte length: u32
+    // bytes of r
+    // s byte length: u32
+    // bytes of s
+    const encodedSignaturePtr: number = encodedSignatureLengthPtr + 4;
+    const encodedSignature = new Uint8Array(initOutput.memory.buffer, encodedSignaturePtr, encodedSignatureLength);
+
+    let offset = 0;
+    const rLength: number = readU32(encodedSignature, offset); offset += 4;
+    const r: BigInt = bytesToBigInt(encodedSignature, offset, rLength); offset += rLength;
+    rInput.value = r;
+
+    const sLength: number = readU32(encodedSignature, offset); offset += 4;
+    const s: BigInt = bytesToBigInt(encodedSignature, offset, sLength); offset += sLength;
+    sInput.value = s;
+  });
 
   const signatureValidElement = document.querySelector('#signatureValid') as HTMLElement;
   const signatureInvalidElement = document.querySelector('#signatureInvalid') as HTMLElement;

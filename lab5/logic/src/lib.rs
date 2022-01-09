@@ -59,3 +59,34 @@ pub fn generate_params() -> *const u8 {
 
     result[..].as_ptr()
 }
+
+#[wasm_bindgen]
+pub fn sign(message: &str, p: &str, q: &str, g: &str, x: &str) -> *const u8 {
+    console_log(format!("{} {} {} {}", p, q, g, x).as_str());
+
+    let message: &[u8] = message.as_bytes();
+
+    let p = &BigUint::parse_bytes(p.as_bytes(), 10).unwrap();
+    let q = &BigUint::parse_bytes(q.as_bytes(), 10).unwrap();
+    let g = &BigUint::parse_bytes(g.as_bytes(), 10).unwrap();
+    let x = &BigUint::parse_bytes(x.as_bytes(), 10).unwrap();
+
+    let (r, s): (BigUint, BigUint) = dsa::sign(message, p, q, g, x);
+
+    console_log(format!("{} {} {} {} {} {}", p, q, g, x, &r, &s).as_str());
+
+    let r = r.to_bytes_be();
+    let s = s.to_bytes_be();
+
+    let mut encoded_signature = Vec::new();
+    encoded_signature.extend(sha1::u32_to_bytes(r.len() as u32));
+    encoded_signature.extend(r.to_vec());
+    encoded_signature.extend(sha1::u32_to_bytes(s.len() as u32));
+    encoded_signature.extend(s.to_vec());
+
+    let mut result = Vec::new();
+    result.extend(sha1::u32_to_bytes(encoded_signature.len() as u32));
+    result.extend(encoded_signature);
+
+    result[..].as_ptr()
+}

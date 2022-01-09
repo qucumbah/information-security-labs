@@ -6,28 +6,12 @@ async function main() {
 
   const messageInput = document.querySelector('#message') as HTMLInputElement;
   const messageFileInput = document.querySelector('#messageFile') as HTMLInputElement;
-  
-  const hashOutput = document.querySelector('#hash') as HTMLInputElement;
-  
-  messageInput.addEventListener('input', () => {
-    const message: string = messageInput.value;
-    if (message.length === 0) {
-      hashOutput.value = '';
-      return;
-    }
-  
-    const hashPtr: number = skein512_hash(message);
-    const hashBytes = new Uint8Array(initOutput.memory.buffer, hashPtr, 64);
 
-    const byteToHex = (byte: number) => ((byte < 16) ? '0' : '') + byte.toString(16);
-    hashOutput.value = [...hashBytes].map(byteToHex).join('');
-  });
-  
   messageFileInput.addEventListener('change', () => {
     if (messageFileInput.files === null || messageFileInput.files.length === 0) {
       return;
     }
-  
+
     const file: File = messageFileInput.files[0]!;
     const reader = new FileReader();
     reader.readAsText(file);
@@ -36,6 +20,28 @@ async function main() {
       messageInput.dispatchEvent(new Event('input'));
     });
   });
+
+  const pInput = document.querySelector('#pInput') as HTMLInputElement;
+  const qInput = document.querySelector('#qInput') as HTMLInputElement;
+  const gInput = document.querySelector('#gInput') as HTMLInputElement;
+  const xInput = document.querySelector('#xInput') as HTMLInputElement;
+  const yInput = document.querySelector('#yInput') as HTMLInputElement;
+
+  const generateParametersButton = document.querySelector('#generateParametersButton') as HTMLInputElement;
+
+  generateParametersButton.addEventListener('click', () => {
+    
+  });
+
+  const rInput = document.querySelector('#rInput') as HTMLInputElement;
+  const sInput = document.querySelector('#sInput') as HTMLInputElement;
+
+  const generateSignatureButton = document.querySelector('#generateSignatureButton') as HTMLInputElement;
+
+  const signatureValidElement = document.querySelector('#signatureValid') as HTMLElement;
+  const signatureInvalidElement = document.querySelector('#signatureInvalid') as HTMLElement;
+
+  const checkSignatureButton = document.querySelector('#checkSignatureButton') as HTMLInputElement;
 }
 
 main();

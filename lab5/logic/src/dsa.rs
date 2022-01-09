@@ -8,7 +8,7 @@ use std::cmp::max;
 
 use openssl::bn::{BigNum, BigNumContext};
 
-fn generate_p_q(L: u32, N: u32) -> (BigNum, BigNum) {
+pub fn generate_p_q(L: u32, N: u32) -> (BigNum, BigNum) {
     let n: u32 = (L - 1) / N;
     let b: u32 = (L - 1) % n;
 
@@ -65,7 +65,7 @@ fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigNum, s: &BigNum) -> Option<
     Option::None
 }
 
-fn generate_g(p: &BigNum, q: &BigNum) -> BigNum {
+pub fn generate_g(p: &BigNum, q: &BigNum) -> BigNum {
     loop {
         let h = rand(&p.sub(&bignum(3))).add(&bignum(2));
         let exp = div(&p.sub(&bignum(1)), &q);
@@ -76,13 +76,13 @@ fn generate_g(p: &BigNum, q: &BigNum) -> BigNum {
     }
 }
 
-fn generate_keys(p: &BigNum, q: &BigNum, g: &BigNum) -> (BigNum, BigNum) {
+pub fn generate_keys(p: &BigNum, q: &BigNum, g: &BigNum) -> (BigNum, BigNum) {
     let x = rand(&q.sub(&bignum(2))).add(&bignum(2));
     let y = powmod(g, &x, p);
     (x, y)
 }
 
-fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigNum, BigNum) {
+pub fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigNum, BigNum) {
     loop {
         let k = rand(&q.sub(&bignum(2))).add(&bignum(2));
         let r = modulus(&powmod(g, &k, p), q);
@@ -106,7 +106,7 @@ fn sign(message: &[u8], p: &BigNum, q: &BigNum, g: &BigNum, x: &BigNum) -> (BigN
     }
 }
 
-fn verify(message: &[u8], r: &BigNum, s: &BigNum, p: &BigNum, q: &BigNum, g: &BigNum, y: &BigNum) -> bool {
+pub fn verify(message: &[u8], r: &BigNum, s: &BigNum, p: &BigNum, q: &BigNum, g: &BigNum, y: &BigNum) -> bool {
     if !validate_sign(r, s, q) {
         return false;
     }

@@ -2,13 +2,17 @@ h1 {
   text-align: center;
 }
 
-.columns {
+.row {
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
 }
 
 textarea {
   display: block;
   font-family: monospace;
+}
+
+label {
+  display: block;
 }

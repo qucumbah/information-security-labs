@@ -62,8 +62,6 @@ pub fn generate_params() -> *const u8 {
 
 #[wasm_bindgen]
 pub fn sign(message: &str, p: &str, q: &str, g: &str, x: &str) -> *const u8 {
-    console_log(format!("{} {} {} {}", p, q, g, x).as_str());
-
     let message: &[u8] = message.as_bytes();
 
     let p = &BigUint::parse_bytes(p.as_bytes(), 10).unwrap();
@@ -89,4 +87,18 @@ pub fn sign(message: &str, p: &str, q: &str, g: &str, x: &str) -> *const u8 {
     result.extend(encoded_signature);
 
     result[..].as_ptr()
+}
+
+#[wasm_bindgen]
+pub fn verify(message: &str, r: &str, s: &str, p: &str, q: &str, g: &str, y: &str) -> bool {
+    let message: &[u8] = message.as_bytes();
+
+    let r = &BigUint::parse_bytes(r.as_bytes(), 10).unwrap();
+    let s = &BigUint::parse_bytes(s.as_bytes(), 10).unwrap();
+    let p = &BigUint::parse_bytes(p.as_bytes(), 10).unwrap();
+    let q = &BigUint::parse_bytes(q.as_bytes(), 10).unwrap();
+    let g = &BigUint::parse_bytes(g.as_bytes(), 10).unwrap();
+    let y = &BigUint::parse_bytes(y.as_bytes(), 10).unwrap();
+
+    dsa::verify(message, r, s, p, q, g, y)
 }

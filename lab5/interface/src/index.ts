@@ -1,5 +1,5 @@
 // @ts-nocheck
-import loadLogic, { initialize, InitOutput, sha1_hash, generate_params, sign } from '../../logic/pkg/logic.js';
+import loadLogic, { initialize, InitOutput, sha1_hash, generate_params, sign, verify } from '../../logic/pkg/logic.js';
 
 async function main() {
   const initOutput: InitOutput = await loadLogic();
@@ -19,6 +19,7 @@ async function main() {
     reader.addEventListener('load', () => {
       messageInput.value = reader.result as string;
       messageInput.dispatchEvent(new Event('input'));
+      updateButtonsDisabled();
     });
   });
 
@@ -69,6 +70,8 @@ async function main() {
     const yLength: number = readU32(encodedParams, offset); offset += 4;
     const y: BigInt = bytesToBigInt(encodedParams, offset, yLength);
     yInput.value = y;
+
+    updateButtonsDisabled();
 
     console.log(pLength, p);
     console.log(qLength, q);
@@ -122,12 +125,74 @@ async function main() {
     const sLength: number = readU32(encodedSignature, offset); offset += 4;
     const s: BigInt = bytesToBigInt(encodedSignature, offset, sLength); offset += sLength;
     sInput.value = s;
+
+    updateButtonsDisabled();
   });
 
   const signatureValidElement = document.querySelector('#signatureValid') as HTMLElement;
   const signatureInvalidElement = document.querySelector('#signatureInvalid') as HTMLElement;
 
   const checkSignatureButton = document.querySelector('#checkSignatureButton') as HTMLInputElement;
+
+  checkSignatureButton.addEventListener('click', () => {
+    if (
+      messageInput.value.length === 0
+      || rInput.value.length === 0
+      || sInput.value.length === 0
+      || pInput.value.length === 0
+      || qInput.value.length === 0
+      || gInput.value.length === 0
+      || yInput.value.length === 0
+    ) {
+      alert('Нужно заполнить поля сообщения, параметров и подписи');
+      return;
+    }
+
+    const message: string = messageInput.value;
+    // Pass these values as decimal strings. They'll be parsed on the rust side
+    const r: string = rInput.value;
+    const s: string = sInput.value;
+    const p: string = pInput.value;
+    const q: string = qInput.value;
+    const g: string = gInput.value;
+    const y: string = yInput.value;
+
+    const verified: boolean = verify(message, r, s, p, q, g, y);
+    signatureValidElement.style.display = verified ? 'block' : 'none';
+    signatureInvalidElement.style.display = verified ? 'none' : 'block';
+  });
+
+  function updateButtonsDisabled() {
+    generateSignatureButton.disabled = (
+      messageInput.value.length === 0
+      || pInput.value.length === 0
+      || qInput.value.length === 0
+      || gInput.value.length === 0
+      || xInput.value.length === 0
+    );
+    checkSignatureButton.disabled = (
+      messageInput.value.length === 0
+      || rInput.value.length === 0
+      || sInput.value.length === 0
+      || pInput.value.length === 0
+      || qInput.value.length === 0
+      || gInput.value.length === 0
+      || yInput.value.length === 0
+    );
+  }
+
+  [
+    pInput,
+    qInput,
+    gInput,
+    xInput,
+    yInput,
+    rInput,
+    sInput,
+  ].forEach((input: HTMLInputElement) => {
+    input.addEventListener('input', updateButtonsDisabled);
+    input.addEventListener('change', updateButtonsDisabled);
+  });
 }
 
 function readU32(bytes: Uint8Array, offset: number): number {

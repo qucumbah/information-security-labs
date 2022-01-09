@@ -11,7 +11,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 extern {
-    fn jslog(s: &str);
+    #[wasm_bindgen(js_namespace = console, js_name = log)]
+    fn console_log(s: &str);
 }
 
 #[wasm_bindgen]
@@ -32,7 +33,7 @@ pub fn generate_params() -> *const u8 {
 
     let (x, y) = dsa::generate_keys(&p, &q, &g);
 
-    jslog(format!("{} {} {} {} {}", p, q, g, x, y).as_str());
+    console_log(format!("{} {} {} {} {}", p, q, g, x, y).as_str());
 
     let p = p.to_bytes_be();
     let q = q.to_bytes_be();

@@ -3,12 +3,12 @@
 
 use crate::sha1;
 
-use num_bigint_dig::{BigUint, BigInt, RandBigInt, ModInverse, Sign};
+use num_bigint_dig::{BigUint, RandBigInt, ModInverse};
 use num_bigint_dig;
 
 pub fn generate_p_q(L: u32, N: u32) -> (BigUint, BigUint) {
     let n: u32 = (L - 1) / N;
-    let b: u32 = (L - 1) % n;
+    let b: u32 = (L - 1) % N;
 
     loop {
         let (q, s): (BigUint, BigUint) = generate_q(N);
@@ -66,7 +66,7 @@ fn generate_p(L: u32, N: u32, n: u32, b: u32, q: &BigUint, s: &BigUint) -> Optio
 pub fn generate_g(p: &BigUint, q: &BigUint) -> BigUint {
     loop {
         let h = rand_range(&bignum(2), &(p - &bignum(1)));
-        let exp = p - bignum(1) / q;
+        let exp = (p - bignum(1)) / q;
         let g = BigUint::modpow(&h, &exp, &p);
         if g.gt(&bignum(1)) {
             return g;
@@ -166,6 +166,8 @@ fn pow(base: &BigUint, exp: &BigUint) -> BigUint {
 
 #[cfg(test)]
 mod tests {
+    use num_bigint_dig::{BigInt, Sign};
+
     use crate::dsa::*;
 
     #[test]
@@ -226,6 +228,19 @@ mod tests {
     }
 
     #[test]
+    fn generate_p_q_g_test() {
+        let (p, q): (BigUint, BigUint) = generate_p_q(1024, 160);
+        let g = generate_g(&p, &q);
+
+        assert!(g.gt(&bignum(1)));
+        assert!(g.lt(&(&p - &bignum(1))));
+
+        println!("{}", &p);
+        println!("{}", &q);
+        println!("{}", &g);
+    }
+
+    #[test]
     fn generate_keys_test() {
         let p = bignum_dec(b"89884656743115795444292670506545122404369547516120638242246041147329121184577153793214631043085152630351753572553065202207818807644735184441806966960815938804019549932554217646356011912882161452569715573167181651910255087932029445748092570475589051328367794913477088996494912554654832203549349274420353558743");
         let q = bignum_dec(b"1037760728721891820706685630761403650200206573193");
@@ -245,9 +260,9 @@ mod tests {
         let q = bignum_dec(b"1037760728721891820706685630761403650200206573193");
         let g = bignum_dec(b"85588551305862488755900255048766199834119825006291566771159904328636942469104416382511597967737368036355223495936081063512778209146536993964808310113488347055781098188045052174684529230294726548862504339579425903754767219964660220008587875650124042734568649409817169138724774262204663207226523331086035940042");
 
-        let (x, y) = generate_keys(&p, &q, &g);
+        let (x, _y) = generate_keys(&p, &q, &g);
 
-        let (r, s) = sign("Some message".as_bytes(), &p, &q, &g, &x);
+        let (_r, _s) = sign("Some message".as_bytes(), &p, &q, &g, &x);
     }
 
     #[test]
@@ -277,12 +292,12 @@ mod tests {
 
         assert!(verify(message, &r, &s, &p, &q, &g, &y));
 
-        println!("p: {:?}", p);
-        println!("q: {:?}", q);
-        println!("g: {:?}", g);
-        println!("x: {:?}", x);
-        println!("y: {:?}", y);
-        println!("r: {:?}", r);
-        println!("s: {:?}", s);
+        println!("p: {}", p);
+        println!("q: {}", q);
+        println!("g: {}", g);
+        println!("x: {}", x);
+        println!("y: {}", y);
+        println!("r: {}", r);
+        println!("s: {}", s);
     }
 }

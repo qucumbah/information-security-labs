@@ -35,3 +35,5 @@ function getAllFiles(dirOrFile) {
   const dirChildren = fse.readdirSync(dirOrFile);
   return dirChildren.map((child) => getAllFiles(path.join(dirOrFile, child))).flat();
 }
+
+console.log(getAllFiles(appDistDir));

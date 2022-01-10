@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./require.js" data-main="./src/interface/index"></script>
+  <link rel="stylesheet" href="./style.css">
+  <title>Лабораторная работа 2</title>
+</head>
+<body>
+  <h1>Лабораторная работа 2. Дешифрование перестановки битов в каждом байте</h1>
+  <div class="columns">
+    <div class="column">
+      <label>Зашифрованный файл:<br><input type="file" id="encryptedFile"></label>
+    </div>
+    <div class="column">
+      <p>Начало сообщения<br>(нужно только для расшифрования):</p>
+      <input type=text id="messageStart">
+      <p id="invalidMessageStart" style="opacity: 0;">Введите сообщение для расшифровки</p>
+    </div>
+    <div class="column">
+      <p>Сообщение:</p>
+      <textarea id="message" cols="30" rows="10"></textarea>
+    </div>
+    <div class="column">
+      <p>Матрица перестановки<br>(8 целевых позиций битов 0..7;<br>нужна только для шифрования):</p>
+      <input type=text id="matrix" value="14357620">
+      <p id="invalidMatrixWarning" style="opacity: 0;">Данная матрица не подходит для шифрования</p>
+    </div>
+  </div>
+  <div class="buttons">
+    <button id="decrypt">Расшифровать</button>
+    <button id="encrypt">Зашифровать</button>
+  </div>
+</body>
+</html>

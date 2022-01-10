@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./interface/src/index.js" type="module"></script>
+  <link rel="stylesheet" href="./style.css">
+  <title>Лабораторная работа 5</title>
+</head>
+<body>
+  <h1>Лабораторная работа 5. Формирование и проверка цифровой подписи по стандарту DSS</h1>
+  <div class="row">
+    <div class="column">
+      <p>Сообщение:</p>
+      <textarea id="message" cols="30" rows="10"></textarea>
+      <label>Загрузить из файла: <input type="file" id="messageFile"></label>
+    </div>
+    <div class="column">
+      <label>p: <input type="text" id="pInput"></label>
+      <label>q: <input type="text" id="qInput"></label>
+      <label>g: <input type="text" id="gInput"></label>
+      <label>x: <input type="text" id="xInput"></label>
+      <label>y: <input type="text" id="yInput"></label>
+      <button id="generateParametersButton">Сгенерировать параметры</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <p>Подпись:</p>
+      <label>r: <input type="text" id="rInput"></label>
+      <label>s: <input type="text" id="sInput"></label>
+      <button id="generateSignatureButton" disabled>Сгенерировать подпись</button>
+    </div>
+    <div class="column">
+      <label>
+        Подпись правильная:
+        <span id="signatureUnchecked">Неизвестно</span>
+        <span id="signatureValid" style="display: none;">Да</span>
+        <span id="signatureInvalid" style="display: none;">Нет</span></label>
+      <button id="checkSignatureButton" disabled>Проверить подпись</button>
+    </div>
+  </div>
+</body>
+</html>

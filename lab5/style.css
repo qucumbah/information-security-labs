@@ -1,0 +1,18 @@
+h1 {
+  text-align: center;
+}
+
+.row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+textarea {
+  display: block;
+  font-family: monospace;
+}
+
+label {
+  display: block;
+}

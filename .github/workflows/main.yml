@@ -24,6 +24,11 @@ jobs:
       - name: Setup wasm-pack
         uses: jetli/wasm-pack-action@v0.3.0
 
+      - name: Install build dependencies
+        run: |
+          cd ./app
+          npm install
+
       - name: Run build
         run: node ./app/make.js
 

@@ -11,6 +11,7 @@ fse.mkdirSync(appDistDir);
 // This is supposed to be run from the root of the repo
 const labFolders = fse.readdirSync('./').filter((folder) => folder.startsWith('lab'));
 for (const labFolder of labFolders) {
+  cp.execSync('npm install', { cwd: labFolder, stdio: 'inherit' });
   cp.execSync('npm run build', { cwd: labFolder, stdio: 'inherit' });
   fse.copySync(path.join(labFolder, 'dist'), path.join(appDistDir, labFolder));
 }

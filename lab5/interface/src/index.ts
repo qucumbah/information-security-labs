@@ -162,6 +162,7 @@ async function main() {
     signatureValidElement.style.display = verified ? 'block' : 'none';
     signatureInvalidElement.style.display = verified ? 'none' : 'block';
     signatureUncheckedElement.style.display = 'none';
+    checkSignatureButton.disabled = true;
   });
 
   function updateElementsState() {
@@ -184,6 +185,7 @@ async function main() {
     signatureValidElement.style.display = 'none';
     signatureInvalidElement.style.display = 'none';
     signatureUncheckedElement.style.display = 'block';
+    checkSignatureButton.disabled = false;
   }
 
   [

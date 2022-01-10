@@ -33,7 +33,11 @@
       <button id="generateSignatureButton" disabled>Сгенерировать подпись</button>
     </div>
     <div class="column">
-      <label>Подпись правильная: <span id="signatureValid" style="display: none;">Да</span><span id="signatureInvalid">Нет</span></label>
+      <label>
+        Подпись правильная:
+        <span id="signatureUnchecked">Неизвестно</span>
+        <span id="signatureValid" style="display: none;">Да</span>
+        <span id="signatureInvalid" style="display: none;">Нет</span></label>
       <button id="checkSignatureButton" disabled>Проверить подпись</button>
     </div>
   </div>

@@ -19,7 +19,7 @@ async function main() {
     reader.addEventListener('load', () => {
       messageInput.value = reader.result as string;
       messageInput.dispatchEvent(new Event('input'));
-      updateButtonsDisabled();
+      updateElementsState();
     });
   });
 
@@ -71,7 +71,7 @@ async function main() {
     const y: BigInt = bytesToBigInt(encodedParams, offset, yLength);
     yInput.value = y;
 
-    updateButtonsDisabled();
+    updateElementsState();
 
     console.log(pLength, p);
     console.log(qLength, q);
@@ -126,11 +126,12 @@ async function main() {
     const s: BigInt = bytesToBigInt(encodedSignature, offset, sLength); offset += sLength;
     sInput.value = s;
 
-    updateButtonsDisabled();
+    updateElementsState();
   });
 
   const signatureValidElement = document.querySelector('#signatureValid') as HTMLElement;
   const signatureInvalidElement = document.querySelector('#signatureInvalid') as HTMLElement;
+  const signatureUncheckedElement = document.querySelector('#signatureUnchecked') as HTMLElement;
 
   const checkSignatureButton = document.querySelector('#checkSignatureButton') as HTMLInputElement;
 
@@ -160,9 +161,10 @@ async function main() {
     const verified: boolean = verify(message, r, s, p, q, g, y);
     signatureValidElement.style.display = verified ? 'block' : 'none';
     signatureInvalidElement.style.display = verified ? 'none' : 'block';
+    signatureUncheckedElement.style.display = 'none';
   });
 
-  function updateButtonsDisabled() {
+  function updateElementsState() {
     generateSignatureButton.disabled = (
       messageInput.value.length === 0
       || pInput.value.length === 0
@@ -179,9 +181,13 @@ async function main() {
       || gInput.value.length === 0
       || yInput.value.length === 0
     );
+    signatureValidElement.style.display = 'none';
+    signatureInvalidElement.style.display = 'none';
+    signatureUncheckedElement.style.display = 'block';
   }
 
   [
+    messageInput,
     pInput,
     qInput,
     gInput,
@@ -190,8 +196,8 @@ async function main() {
     rInput,
     sInput,
   ].forEach((input: HTMLInputElement) => {
-    input.addEventListener('input', updateButtonsDisabled);
-    input.addEventListener('change', updateButtonsDisabled);
+    input.addEventListener('input', updateElementsState);
+    input.addEventListener('change', updateElementsState);
   });
 }
 
